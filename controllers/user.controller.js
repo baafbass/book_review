@@ -77,8 +77,35 @@ const addBookReview = (req,res) => {
       })
 }
 
+const deleteBookReview = (req,res) => {
+    const {isbn} = req.params;
+    const username = req.username;
+
+    const book = books[isbn];
+
+    if(!book){
+        return res.status(404).json({
+            message: 'The Book was not found',
+        })
+    }
+
+    if(!book['reviews'][username]){
+       return res.status(404).json({
+        message: "No review was found",
+       })
+    }
+
+    delete book['reviews'][username];
+
+    return res.status(209).json({
+        message: "Review successfully deleted",
+        reviews: book['reviews'],
+    })
+}
+
 module.exports.isValid = isValid;
 module.exports = {
 	login,
-	addBookReview
+	addBookReview,
+    deleteBookReview
 }
