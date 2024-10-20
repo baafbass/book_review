@@ -12,9 +12,10 @@ const auth = (req,res,next) => {
 
 		try {
 			const decoded = jwt.verify(token,'faridSecretKey')
-            req.username = decode.username
+            req.username = decoded.username
             next()
 		} catch (error) {
+			console.log(error)
 			return res.status(403).json({
 				message: 'User not logged in'
 			})
@@ -22,7 +23,7 @@ const auth = (req,res,next) => {
 
 	} else {
 	return res.status(403).json({
-    message: "User not logged in"
+    message: "User not logged in---"
 	})
 }
 }

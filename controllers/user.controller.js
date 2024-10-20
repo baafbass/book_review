@@ -26,7 +26,7 @@ const login = (req,res) => {
     }
 
     if (authenticatedUser(username,password)) {
-    	const token = jwt.sign({username},'faridSecretKey',{expiresIn:60*2})
+    	const token = jwt.sign({username},'faridSecretKey',{expiresIn:60*60})
 
     	req.session.authorization = {
     		token,username
@@ -44,7 +44,37 @@ const login = (req,res) => {
 }
 
 const addBookReview = (req,res) => {
+      const {review} = req.query;
+      const {isbn} = req.params;
+      const username = req.username;
+      
+      const book = books[isbn]
 
+      if(!book) {
+        return res.status(404).json({
+            message: "The book to added review was not found",
+        })
+      }
+
+      if (book['reviews'][username] === review){
+        return res.status(200).json({
+            message: "The review already exist"
+        })
+      }
+
+      if (book['reviews'][username]){
+        book['reviews'][username] = review;
+        return res.status(201).json({
+            message: 'Review updated successfully'
+        })
+      }
+
+      book['reviews'][username] = review;
+
+      return res.status(201).json({
+        message: 'Review added successfully',
+        review: book['reviews'][username]
+      })
 }
 
 module.exports.isValid = isValid;
