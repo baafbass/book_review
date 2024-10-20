@@ -33,61 +33,87 @@ const register = (req,res) => {
 }
 
 const getBookList = (req,res) => {
-   return res.status(200).json(JSON.stringify(books))
+	new Promise((resolve,reject)=>{
+		if(books) {
+			resolve(books)
+		} else {
+			reject('Books not found')
+		}
+
+	}).then((bookList)=>{
+		return res.status(200).json(JSON.stringify(bookList))
+	}).catch((error)=>{
+		return res.status(500).json({
+			error,
+		})
+	})
 }
 
 const getBookDetailsByISBN = (req,res) => {
       const {isbn} = req.params;
       const book = books[isbn];
-      
-      if(!book) {
+
+      new Promise((resolve,reject)=>{
+      	const book = books[isbn]
+
+      	if(book){
+      		resolve(book)
+      	} else {
+      		reject('The Book was not found')
+      	}
+      }).then((book)=>{
+      	return res.status(200).json({book})
+      }).catch((error)=>{
       	return res.status(404).json({
-      		message: "The book details was not found",
+        error,
       	})
-      }
-       
-      return res.status(200).json({book})
+      })
 }
 
 const getBookDetailsByAuthor = (req,res) => {
 	const {author} = req.params;
-   
-	const keys = Object.keys(books)
 
-	var book = []
+	new Promise((resolve,reject)=>{
+		const keys = Object.keys(books)
+		const Books = keys
+		                  .filter((key)=>books[key].author===author)
+		                  .map((key)=>books[key])
 
-    keys.map((key)=>{
-		if (books[key].author === author) book.push(books[key])
-	})
-
-	if (!book) {
+		if (Books.length > 0 ){
+			resolve(Books)
+		} else {
+			reject('books by the specified author were not found')
+		}
+	}).then((books)=>{
+		return res.status(200).json(books)
+	}).catch((error)=>{
 		return res.status(404).json({
-			message: "The book details was not found",
+			error,
 		})
-	}
-
-    return res.status(200).json(book);
+	})
 }
 
 const getBooksByTitle = (req,res) => {
 	const {title} = req.params;
 
-	var book = []
+	new Promise((resolve,reject)=>{
+		const keys = Object.keys(books)
 
-	const keys = Object.keys(books)
-
-	keys.map((key)=> {
-		if (books[key].title === title) book.push(books[key])
-	})
-
-	if (!book) {
+		const book = keys
+		                 .filter((key)=>books[key].title===title)
+		                 .map((key)=>books[key])
+		if(book.length > 0){
+			resolve(book)
+		} else {
+			reject('The book was not found')
+		}
+	}).then((book)=>{
+		return res.status(200).json(book)
+	}).catch((error)=>{
 		return res.status(404).json({
-			message: "The books was not found",
+			error,
 		})
-	}
-
-	return res.status(200).json(book)
-
+	})
 }
 
 const getBookReview = (req,res) => {
